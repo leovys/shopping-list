@@ -5,6 +5,7 @@ export interface User {
   password: string;
   language: Language;
   currency: Currency;
+  theme: string;
   createdAt: string;
 }
 

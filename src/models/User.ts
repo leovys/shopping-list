@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     language: { type: String, enum: ["pt", "en", "es"], default: "pt" },
     currency: { type: String, enum: ["BRL", "USD", "EUR"], default: "BRL" },
+    theme: { type: String, default: "green" },
   },
   {
     timestamps: true,

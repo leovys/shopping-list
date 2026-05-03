@@ -36,6 +36,10 @@ export default function ListPage({ params }: { params: { id: string } }) {
   const [budgetInput, setBudgetInput] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [editingItem, setEditingItem] = useState<ListItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editQty, setEditQty] = useState("1");
+  const [editPrice, setEditPrice] = useState("");
 
   useEffect(() => {
     if (!isReady) return;
@@ -82,6 +86,28 @@ export default function ListPage({ params }: { params: { id: string } }) {
     setItemName("");
     setItemQty("1");
     setItemPrice("");
+  }
+
+  function startEditItem(item: ListItem) {
+    setEditingItem(item);
+    setEditName(item.name);
+    setEditQty(item.quantity.toString());
+    setEditPrice(item.price?.toString() ?? "");
+  }
+
+  function saveEditItem() {
+    if (!editingItem || !editName.trim()) return;
+    const updated: ListItem = {
+      ...editingItem,
+      name: editName.trim(),
+      quantity: parseInt(editQty) || 1,
+      price: editPrice ? parseFloat(editPrice) : undefined,
+    };
+    persist({
+      ...list!,
+      items: list!.items.map((i) => (i.id === editingItem.id ? updated : i)),
+    });
+    setEditingItem(null);
   }
 
   function toggleItem(itemId: string) {
@@ -306,12 +332,20 @@ export default function ListPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => removeItem(item.id)}
-                  className="text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => startEditItem(item)}
+                    className="p-1.5 text-gray-300 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="p-1.5 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -373,6 +407,68 @@ export default function ListPage({ params }: { params: { id: string } }) {
               <button onClick={handleArchive} className="flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2.5 rounded-lg">
                 {t("archiveList")}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingItem && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">
+              {t("edit")} item
+            </h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && saveEditItem()}
+                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-base"
+                placeholder={t("itemName")}
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <div className="flex flex-col flex-1">
+                  <label className="text-xs text-gray-400 mb-1 pl-1">{t("quantity")}</label>
+                  <input
+                    type="number"
+                    value={editQty}
+                    onChange={(e) => setEditQty(e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-center"
+                    min="1"
+                    inputMode="numeric"
+                  />
+                </div>
+                <div className="flex flex-col flex-[2]">
+                  <label className="text-xs text-gray-400 mb-1 pl-1">{t("price")}</label>
+                  <input
+                    type="number"
+                    value={editPrice}
+                    onChange={(e) => setEditPrice(e.target.value)}
+                    className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    placeholder="0,00"
+                    min="0"
+                    step="0.01"
+                    inputMode="decimal"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => setEditingItem(null)}
+                  className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 font-medium"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  onClick={saveEditItem}
+                  disabled={!editName.trim()}
+                  className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-xl"
+                >
+                  {t("save")}
+                </button>
+              </div>
             </div>
           </div>
         </div>

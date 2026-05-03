@@ -23,6 +23,7 @@ export async function PUT(req: NextRequest) {
   if (updates.name) allowed.name = updates.name;
   if (updates.language) allowed.language = updates.language;
   if (updates.currency) allowed.currency = updates.currency;
+  if (updates.theme) allowed.theme = updates.theme;
 
   await connectDB();
   const user = await User.findByIdAndUpdate(userId, { $set: allowed }, { new: true });

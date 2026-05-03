@@ -10,6 +10,7 @@ import {
 } from "react";
 import { User, ShoppingList, Currency } from "@/types";
 import { translations, TranslationKey } from "@/lib/translations";
+import { applyTheme, initTheme } from "@/lib/themes";
 
 const TOKEN_KEY = "sl_token";
 
@@ -40,6 +41,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    initTheme();
     const saved = localStorage.getItem(TOKEN_KEY);
     if (!saved) { setIsReady(true); return; }
 
@@ -49,6 +51,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (!meData) { localStorage.removeItem(TOKEN_KEY); return; }
         setCurrentUser(meData.user);
         setToken(saved);
+        if (meData.user.theme) applyTheme(meData.user.theme);
         const r = await fetch("/api/lists", { headers: { Authorization: `Bearer ${saved}` } });
         if (r.ok) { const d = await r.json(); setLists(d.lists); }
       })
@@ -119,6 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const updateUser = useCallback(
     async (updates: Partial<User>): Promise<void> => {
       if (!token) return;
+      if (updates.theme) applyTheme(updates.theme);
       const res = await fetch("/api/auth/me", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },

@@ -15,6 +15,7 @@ import {
 import Navbar from "@/components/Navbar";
 import { useApp } from "@/context/AppContext";
 import { Language, Currency } from "@/types";
+import { THEMES, ThemeId } from "@/lib/themes";
 
 const LANGUAGES: { value: Language; label: string; flag: string }[] = [
   { value: "pt", label: "Português", flag: "🇧🇷" },
@@ -35,6 +36,7 @@ export default function SettingsPage() {
   const [name, setName] = useState("");
   const [language, setLanguage] = useState<Language>("pt");
   const [currency, setCurrency] = useState<Currency>("BRL");
+  const [theme, setTheme] = useState<ThemeId>("green");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function SettingsPage() {
       setName(currentUser.name);
       setLanguage(currentUser.language);
       setCurrency(currentUser.currency);
+      setTheme((currentUser.theme as ThemeId) || "green");
     }
   }, [isReady, currentUser, router]);
 
@@ -53,9 +56,14 @@ export default function SettingsPage() {
 
   async function handleSave() {
     if (!name.trim()) return;
-    updateUser({ name: name.trim(), language, currency });
+    await updateUser({ name: name.trim(), language, currency, theme });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function handleThemeSelect(t: ThemeId) {
+    setTheme(t);
+    updateUser({ theme: t });
   }
 
   function handleLogout() {
@@ -180,6 +188,41 @@ export default function SettingsPage() {
                 )}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-primary-100 p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-4 h-4 rounded-full bg-primary-600" />
+            <h3 className="font-semibold text-gray-700">Cor do Tema</h3>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {(Object.entries(THEMES) as [ThemeId, { label: string; swatch: string }][]).map(
+              ([id, { label, swatch }]) => (
+                <button
+                  key={id}
+                  onClick={() => handleThemeSelect(id)}
+                  className="flex flex-col items-center gap-1.5 group"
+                  title={label}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full border-4 transition-all ${
+                      theme === id
+                        ? "border-gray-800 scale-110"
+                        : "border-transparent hover:scale-105"
+                    }`}
+                    style={{ backgroundColor: swatch }}
+                  >
+                    {theme === id && (
+                      <Check className="w-full h-full text-white p-2" />
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500 group-hover:text-gray-700">
+                    {label}
+                  </span>
+                </button>
+              )
+            )}
           </div>
         </div>
 
