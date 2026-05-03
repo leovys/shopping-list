@@ -1,4 +1,4 @@
-export type ThemeId = "green" | "blue" | "orange" | "purple" | "pink" | "gray" | "dark";
+export type ThemeId = "green" | "blue" | "orange" | "purple" | "pink" | "gray" | "dark" | "black";
 
 interface ThemeOption {
   label: string;
@@ -68,6 +68,15 @@ export const THEMES: Record<ThemeId, ThemeOption> = {
       "--p-50": "#f8fafc", "--p-100": "#f1f5f9", "--p-200": "#e2e8f0",
       "--p-300": "#cbd5e1", "--p-400": "#94a3b8", "--p-500": "#64748b",
       "--p-600": "#475569", "--p-700": "#334155", "--p-800": "#1e293b", "--p-900": "#0f172a",
+    },
+  },
+  black: {
+    label: "Black",
+    swatch: "#000000",
+    vars: {
+      "--p-50": "#f2f2f2", "--p-100": "#e0e0e0", "--p-200": "#c2c2c2",
+      "--p-300": "#a3a3a3", "--p-400": "#858585", "--p-500": "#666666",
+      "--p-600": "#000000", "--p-700": "#000000", "--p-800": "#000000", "--p-900": "#000000",
     },
   },
 };
