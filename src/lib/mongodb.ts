@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-
-if (!MONGODB_URI) {
-  throw new Error("MONGODB_URI não definido no .env.local");
-}
+const MONGODB_URI = process.env.MONGODB_URI ?? "";
 
 declare global {
   // eslint-disable-next-line no-var
@@ -17,6 +13,7 @@ if (!cached) {
 }
 
 export async function connectDB() {
+  if (!MONGODB_URI) throw new Error("MONGODB_URI não configurado nas variáveis de ambiente");
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
