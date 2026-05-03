@@ -30,10 +30,14 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 300));
-    const user = register(name, email, password);
-    if (!user) {
+    const result = await register(name, email, password);
+    if (result === "duplicate") {
       setError(t("errorEmail"));
+      setLoading(false);
+      return;
+    }
+    if (result === "error") {
+      setError("Erro no servidor. Verifique sua conexão e tente novamente.");
       setLoading(false);
       return;
     }

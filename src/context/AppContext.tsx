@@ -17,8 +17,8 @@ interface AppContextType {
   currentUser: User | null;
   lists: ShoppingList[];
   token: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<User | null>;
+  login: (email: string, password: string) => Promise<"ok" | "invalid" | "error">;
+  register: (name: string, email: string, password: string) => Promise<"ok" | "duplicate" | "error">;
   logout: () => void;
   updateUser: (updates: Partial<User>) => Promise<void>;
   createList: (name: string, budget?: number) => Promise<ShoppingList>;
@@ -73,36 +73,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [currentUser?.currency]
   );
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string): Promise<"ok" | "invalid" | "error"> => {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) return false;
+    if (res.status === 401) return "invalid";
+    if (!res.ok) return "error";
     const { token: tok, user } = await res.json();
     localStorage.setItem(TOKEN_KEY, tok);
     setToken(tok);
     setCurrentUser(user);
     const r = await fetch("/api/lists", { headers: { Authorization: `Bearer ${tok}` } });
     if (r.ok) { const d = await r.json(); setLists(d.lists); }
-    return true;
+    return "ok";
   }, []);
 
   const register = useCallback(
-    async (name: string, email: string, password: string): Promise<User | null> => {
+    async (name: string, email: string, password: string): Promise<"ok" | "duplicate" | "error"> => {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
-      if (!res.ok) return null;
+      if (res.status === 409) return "duplicate";
+      if (!res.ok) return "error";
       const { token: tok, user } = await res.json();
       localStorage.setItem(TOKEN_KEY, tok);
       setToken(tok);
       setCurrentUser(user);
       setLists([]);
-      return user;
+      return "ok";
     },
     []
   );

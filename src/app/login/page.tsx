@@ -22,11 +22,14 @@ export default function LoginPage() {
       return;
     }
     setLoading(true);
-    const ok = await login(email, password);
-    if (ok) {
+    const result = await login(email, password);
+    if (result === "ok") {
       router.push("/dashboard");
-    } else {
+    } else if (result === "invalid") {
       setError(t("errorLogin"));
+      setLoading(false);
+    } else {
+      setError("Erro no servidor. Tente novamente.");
       setLoading(false);
     }
   }
